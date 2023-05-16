@@ -1,0 +1,83 @@
+<Project>
+  <PropertyGroup>
+    <!-- We have to build Publish AND PublishContainer because PublishContainer (and other
+        PublishProfile-delivered targets) don't have an explicit Publish dependency. -->
+    <_RequiredContainerPublishTargets>Restore;Publish;PublishContainer</_RequiredContainerPublishTargets>
+    <!-- TODO: remove after SDK pr flows -->
+    <ContainerRuntimeIdentifier>linux-x64</ContainerRuntimeIdentifier>
+    <!-- TODO: remove later -->
+    <ContainerImageTag>latest</ContainerImageTag>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(EnableSdkContainerSupport)' == 'true'">
+    <PackageReference Include="Microsoft.NET.Build.Containers">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>build</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <!-- Entrypoint, either from solution-level `/t:Containerize` or project-level `/t:Containerize` -->
+  <Target Name="Containerize" Condition="'$(EnableSdkContainerSupport)' == 'true'">
+    <!-- Strategy here is that we will figure out what project(s) to build the containerization targets(s) for
+         based on project state. We use `AdditionalProperties` to customize the outputs of each of the builds. -->
+
+    <!-- Properties set here:
+      * TargetFramework - multitargeting - changes inference for base image based on TFM
+      * VersionSuffix - without either explicitly setting `ContainerImageTag` or influencing the tag in some way
+                        (I chose `VersionSuffix` because it lets folks still customize the 'base' of the version
+                        and follows a Docker-ish convention of arch-specific info adding to the end of the tag)
+                        we'll get the same 'tag' for each image, which would cause the images to override when
+                        pushed to a registry or local daemon
+      * ContainerRuntimeIdentifier - if we're building for a specific RID, we need to set this so that the
+                                     containerization targets know what RID to build for
+      * RuntimeIdentifier - if we're building for a specific RID, we need to set this so that we get optimized 
+                            RID-specific assets in the publish output
+
+      NOTE: we could get away with setting `RuntimeIdentifier` here to control `ContainerRuntimeIdentifier` inference
+            but this is also nice and explicit.
+     -->
+
+    <!-- TFMs but no TF -> multitarget, making image for each TFM -->
+    <ItemGroup Condition="'$(TargetFrameworks)' != ''
+                          and '$(TargetFramework)' == ''" >
+      <_TFMItems Include="$(TargetFrameworks)" />
+      <_SingleContainerPublish Include="$(MSBuildProjectFullPath)"
+        AdditionalProperties="TargetFramework=%(_TFMItems.Identity);
+                              VersionSuffix=$([MSBuild]::GetTargetFrameworkVersion('%(_TFMItems.Identity)', 2))" />
+    </ItemGroup>
+    
+    <!-- TF but no TFMs and no RID -> single image (aka the default pathway) up until now -->
+    <ItemGroup Condition="'$(TargetFramework)' != ''
+                          and '$(RuntimeIdentifiers)' == ''
+                          and '$(ContainerRuntimeIdentifiers)' == ''">
+        <_RIDItems Include="linux-x64" GoStyleArch="linux-arm64" />
+        <_SingleContainerPublish Include="$(MSBuildProjectFullPath)" 
+          AdditionalProperties="ContainerRuntimeIdentifier=%(_RIDItems.Identity);
+                                RuntimeIdentifier=%(_RIDItems.Identity);
+                                VersionSuffix=%(_RIDItems.GoStyleArch);"
+          UndefineProperties="RuntimeIdentifiers;ContainerRuntimeIdentifiers" />
+    </ItemGroup>
+
+    <!-- TF with RIDs -> multi-arch, single image per arch -->
+    <ItemGroup Condition="'$(TargetFramework)' != ''
+                          and 
+                          ('$(RuntimeIdentifiers)' != '' or '$(ContainerRuntimeIdentifiers)' != '')">
+      <_RIDItems Include="$(RuntimeIdentifiers)" />
+      <_RIDItems Include="$(ContainerRuntimeIdentifiers)" />
+      <_RIDItems Update="@(_RIDItems)">
+        <GoStyleArch>$([System.String]::new('%(Identity)').Replace('x64', 'amd64'))</GoStyleArch>
+      </_RIDItems>
+      
+      <_SingleContainerPublish Include="$(MSBuildProjectFullPath)"
+        AdditionalProperties="ContainerRuntimeIdentifier=%(_RIDItems.Identity);
+                              RuntimeIdentifier=%(_RIDItems.Identity);
+                              VersionSuffix=%(_RIDItems.GoStyleArch);"
+        UndefineProperties="RuntimeIdentifiers;ContainerRuntimeIdentifiers"
+        />
+    </ItemGroup>
+    
+    <MSBuild Projects="@(_SingleContainerPublish)" 
+      Targets="$(_RequiredContainerPublishTargets)" 
+      BuildInParallel="true" />
+  </Target>
+</Project>
