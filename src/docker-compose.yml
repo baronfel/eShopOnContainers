@@ -18,63 +18,42 @@ services:
     image: rabbitmq:3-management-alpine
 
   identity-api:
-    image: ${REGISTRY:-eshop}/identity.api:${PLATFORM:-linux}-${TAG:-latest}
-    build:
-      context: .
-      dockerfile: Services/Identity/Identity.API/Dockerfile
+    image: identity-api
     depends_on:
       - sqldata
 
   basket-api:
-    image: ${REGISTRY:-eshop}/basket.api:${PLATFORM:-linux}-${TAG:-latest}
-    build:
-      context: .
-      dockerfile: Services/Basket/Basket.API/Dockerfile
+    image: basket-api
     depends_on:
       - basketdata
       - identity-api
       - rabbitmq
 
   catalog-api:
-    image: ${REGISTRY:-eshop}/catalog.api:${PLATFORM:-linux}-${TAG:-latest}
-    build:
-      context: .
-      dockerfile: Services/Catalog/Catalog.API/Dockerfile
+    image: catalog-api
     depends_on:
       - sqldata
       - rabbitmq
 
   ordering-api:
-    image: ${REGISTRY:-eshop}/ordering.api:${PLATFORM:-linux}-${TAG:-latest}
-    build:
-      context: .
-      dockerfile: Services/Ordering/Ordering.API/Dockerfile
+    image: ordering-api
     depends_on:
       - sqldata
       - rabbitmq
 
   ordering-backgroundtasks:
-    image: ${REGISTRY:-eshop}/ordering.backgroundtasks:${PLATFORM:-linux}-${TAG:-latest}
-    build:
-      context: .
-      dockerfile: Services/Ordering/Ordering.BackgroundTasks/Dockerfile
+    image: ordering-backgroundtasks
     depends_on:
       - sqldata
       - rabbitmq
 
   payment-api:
-    image: ${REGISTRY:-eshop}/payment.api:${PLATFORM:-linux}-${TAG:-latest}
-    build:
-      context: .
-      dockerfile: Services/Payment/Payment.API/Dockerfile
+    image: payment-api
     depends_on:
       - rabbitmq
 
   webhooks-api:
-    image: ${REGISTRY:-eshop}/webhooks.api:${PLATFORM:-linux}-${TAG:-latest}
-    build:
-      context: .
-      dockerfile: Services/Webhooks/Webhooks.API/Dockerfile
+    image: webhooks-api
     depends_on:
       - sqldata
 
@@ -82,10 +61,7 @@ services:
     image: envoyproxy/envoy:v1.11.1
 
   mobileshoppingagg:
-    image: ${REGISTRY:-eshop}/mobileshoppingagg:${PLATFORM:-linux}-${TAG:-latest}
-    build:
-      context: .
-      dockerfile: ApiGateways/Mobile.Bff.Shopping/aggregator/Dockerfile
+    image: mobileshoppingagg
     depends_on:
       - nosqldata
       - sqldata
@@ -96,10 +72,7 @@ services:
       - basket-api
 
   webshoppingagg:
-    image: ${REGISTRY:-eshop}/webshoppingagg:${PLATFORM:-linux}-${TAG:-latest}
-    build:
-      context: .
-      dockerfile: ApiGateways/Web.Bff.Shopping/aggregator/Dockerfile
+    image: webshoppingagg
     depends_on:
       - nosqldata
       - sqldata
@@ -110,10 +83,7 @@ services:
       - basket-api
 
   ordering-signalrhub:
-    image: ${REGISTRY:-eshop}/ordering.signalrhub:${PLATFORM:-linux}-${TAG:-latest}
-    build:
-      context: .
-      dockerfile: Services/Ordering/Ordering.SignalrHub/Dockerfile
+    image: ordering-signalrhub
     depends_on:
       - nosqldata
       - sqldata
@@ -124,35 +94,21 @@ services:
       - basket-api
 
   webstatus:
-    image: ${REGISTRY:-eshop}/webstatus:${PLATFORM:-linux}-${TAG:-latest}
-    build:
-      context: .
-      dockerfile: Web/WebStatus/Dockerfile
+    image: webstatus
 
   webspa:
-    image: ${REGISTRY:-eshop}/webspa:${PLATFORM:-linux}-${TAG:-latest}
-    build:
-      context: .
-      dockerfile: Web/WebSPA/Dockerfile
-      args:
-        NODE_IMAGE: ${NODE_IMAGE:-node:16-bullseye}
+    image: webspa
     depends_on:
       - webshoppingagg
       - webshoppingapigw
 
   webmvc:
-    image: ${REGISTRY:-eshop}/webmvc:${PLATFORM:-linux}-${TAG:-latest}
-    build:
-      context: .
-      dockerfile: Web/WebMVC/Dockerfile
+    image: webmvc
     depends_on:
       - webshoppingagg
 
   webhooks-client:
-    image: ${REGISTRY:-eshop}/webhooks.client:${PLATFORM:-linux}-${TAG:-latest}
-    build:
-      context: .
-      dockerfile: Web/WebhookClient/Dockerfile
+    image: webhooks-client
     depends_on:
       - webhooks-api
 

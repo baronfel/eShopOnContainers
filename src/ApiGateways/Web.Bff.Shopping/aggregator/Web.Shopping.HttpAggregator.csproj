@@ -5,6 +5,9 @@
     <AssemblyName>Web.Shopping.HttpAggregator</AssemblyName>
     <RootNamespace>Microsoft.eShopOnContainers.Web.Shopping.HttpAggregator</RootNamespace>
     <DockerComposeProjectPath>..\..\..\docker-compose.dcproj</DockerComposeProjectPath>
+    <EnableSdkContainerSupport>true</EnableSdkContainerSupport>
+    <SelfContained>false</SelfContained>
+    <ContainerImageName>webshoppingagg</ContainerImageName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,4 +29,3 @@
   </ItemGroup>
 
 </Project>
-

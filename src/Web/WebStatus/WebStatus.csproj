@@ -4,6 +4,8 @@
     <AssetTargetFallback>$(AssetTargetFallback);portable-net45+win8+wp8+wpa81;</AssetTargetFallback>
     <DockerComposeProjectPath>..\..\..\docker-compose.dcproj</DockerComposeProjectPath>
     <IsTransformWebConfigDisabled>true</IsTransformWebConfigDisabled>    
+    <EnableSdkContainerSupport>true</EnableSdkContainerSupport>
+    <SelfContained>false</SelfContained>
   </PropertyGroup>
 
   <ItemGroup>

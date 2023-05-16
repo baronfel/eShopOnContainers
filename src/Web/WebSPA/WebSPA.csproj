@@ -13,6 +13,8 @@
     <DockerfileContext>..\..\..</DockerfileContext>
     <DockerComposeProjectPath>..\..\..\docker-compose.dcproj</DockerComposeProjectPath>
     <SpaRoot>Client\</SpaRoot>
+    <EnableSdkContainerSupport>true</EnableSdkContainerSupport>
+    <SelfContained>false</SelfContained>
   </PropertyGroup>
 
   <ItemGroup>

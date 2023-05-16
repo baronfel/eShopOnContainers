@@ -6,6 +6,8 @@
     <PackageId>Catalog.API</PackageId>
     <UserSecretsId>aspnet-Catalog.API-20161122013618</UserSecretsId>
     <DockerComposeProjectPath>..\..\..\..\docker-compose.dcproj</DockerComposeProjectPath>
+    <EnableSdkContainerSupport>true</EnableSdkContainerSupport>
+    <SelfContained>false</SelfContained>
   </PropertyGroup>
 
   <ItemGroup>

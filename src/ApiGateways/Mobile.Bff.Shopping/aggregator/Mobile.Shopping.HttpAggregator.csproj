@@ -7,6 +7,9 @@
     <DockerComposeProjectPath>..\..\..\docker-compose.dcproj</DockerComposeProjectPath>
     <GenerateErrorForMissingTargetingPacks>false</GenerateErrorForMissingTargetingPacks>
     <IsTransformWebConfigDisabled>true</IsTransformWebConfigDisabled>    
+    <EnableSdkContainerSupport>true</EnableSdkContainerSupport>
+    <SelfContained>false</SelfContained>
+    <ContainerImageName>mobileshoppingagg</ContainerImageName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -43,4 +46,3 @@
   </ItemGroup>
 
 </Project>
-
