@@ -102,12 +102,6 @@ services:
       - webshoppingagg
       - webshoppingapigw
 
-  webspajs:
-    image: webspajs
-    build:
-      context: ./src/Web/WebSPA/Client
-      dockerfile: Dockerfile
-
   webmvc:
     image: webmvc
     depends_on:
